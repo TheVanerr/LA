@@ -1,9 +1,12 @@
 graphify-out/
 scripts/
 preview-assets.html
-cofffee.gif
-walk.gif
-lazy.gif
-giphy*.gif
-alcohol.png
 .firebase/
+supabase/
+
+# Sadece proje kökündeki ham dosyalar (assets/images dahil değil)
+/cofffee.gif
+/walk.gif
+/lazy.gif
+/giphy*.gif
+/alcohol.png

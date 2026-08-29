@@ -10,11 +10,11 @@
       "supabase/**",
       "agent-tools/**",
       "preview-assets.html",
-      "cofffee.gif",
-      "walk.gif",
-      "lazy.gif",
-      "giphy*.gif",
-      "alcohol.png"
+      "/cofffee.gif",
+      "/walk.gif",
+      "/lazy.gif",
+      "/giphy*.gif",
+      "/alcohol.png"
     ],
     "headers": [
       {
