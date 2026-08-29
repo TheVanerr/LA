@@ -59,11 +59,16 @@
       padding: 2rem 1.25rem;
       text-align: center;
       gap: 1.25rem;
+      z-index: 1;
       transition: opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1),
                   transform 0.65s cubic-bezier(0.22, 1, 0.36, 1),
                   visibility 0.65s linear;
       overflow-y: auto;
       overscroll-behavior: contain;
+    }
+
+    .screen:not(.hidden) {
+      z-index: 2;
     }
 
     .screen.hidden {
@@ -212,7 +217,7 @@
     }
 
     .time-section {
-      display: flex;
+      display: none;
       flex-direction: column;
       align-items: center;
       gap: 1rem;
@@ -223,6 +228,7 @@
     }
 
     .time-section.show {
+      display: flex;
       animation: fade-in-up 0.8s ease forwards;
       pointer-events: auto;
     }
@@ -449,6 +455,69 @@
       box-shadow: var(--shadow-glow);
     }
 
+    .date-pick.selected-secondary {
+      border-color: var(--color-lavender, #c4b5e8);
+      background: rgba(255, 255, 255, 0.82);
+      box-shadow: 0 0 24px rgba(196, 181, 232, 0.35);
+    }
+
+    .date-confirm-prompt {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      text-align: center;
+      margin-top: 0.75rem;
+      max-width: min(420px, 92vw);
+    }
+
+    .date-confirm-prompt.show {
+      display: flex;
+      animation: fade-in-up 0.65s ease forwards;
+    }
+
+    .date-confirm-text {
+      font-family: var(--font-handwriting);
+      font-size: clamp(1.35rem, 3.8vw, 1.85rem);
+      color: var(--color-rose-deep);
+      line-height: 1.35;
+    }
+
+    .date-confirm-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      justify-content: center;
+    }
+
+    .date-pick-hint {
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      color: var(--color-text-soft);
+      min-height: 1.25em;
+      margin-top: 0.35rem;
+    }
+
+    .dual-time-grid {
+      display: flex;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .time-picker-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.65rem;
+    }
+
+    .cute-clock-dual {
+      width: min(190px, 42vw);
+      height: min(190px, 42vw);
+    }
+
     #dateDisplayWrap:not(.show) {
       display: none;
     }
@@ -548,6 +617,14 @@
         <button type="button" class="date-pick" data-date="05.09.2026">05.09.2026</button>
         <button type="button" class="date-pick" data-date="12.09.2026">12.09.2026</button>
       </div>
+      <p class="date-pick-hint" id="datePickHint" aria-live="polite"></p>
+      <div class="date-confirm-prompt" id="dateConfirmPrompt">
+        <p class="date-confirm-text">Emin misin bence bir date yetmez ben olsam bir tarih daha seçerdimm</p>
+        <div class="date-confirm-actions">
+          <button type="button" class="btn-romantic btn-yes" id="btnDateContinue">Devam et 💕</button>
+          <button type="button" class="btn-romantic btn-no" id="btnPickSecondDate">2. tarihi de seç</button>
+        </div>
+      </div>
       <div class="date-display" id="dateDisplayWrap" aria-live="polite">
         <span class="date-part" id="d1">12</span>
         <span class="date-sep" id="s1">.</span>
@@ -557,7 +634,7 @@
       </div>
     </div>
 
-    <div class="time-section" id="timeSection">
+    <div class="time-section" id="timeSectionSingle">
       <p class="time-question">Date'e ne zaman başlıyoruz?</p>
       <div class="time-picker-wrap">
         <div class="cute-clock" id="cuteClock">
@@ -574,6 +651,41 @@
         <button class="btn-romantic btn-yes" id="btnConfirmTime" disabled>Saati onayla 💕</button>
         <p class="time-confirm-note" id="timeConfirmNote"></p>
       </div>
+    </div>
+
+    <div class="time-section" id="timeSectionDual">
+      <div class="dual-time-grid">
+        <div class="time-picker-block">
+          <p class="time-question" id="dualTimeLabel1"></p>
+          <div class="cute-clock cute-clock-dual" id="cuteClock1">
+            <svg viewBox="0 0 200 200" aria-label="Birinci tarih saat seçici">
+              <circle class="clock-face" cx="100" cy="100" r="92"/>
+              <g id="clockTicks1"></g>
+              <g id="clockNumbers1"></g>
+              <line class="clock-hand clock-hand-hour" id="hourHand1" x1="100" y1="100" x2="100" y2="58"/>
+              <line class="clock-hand clock-hand-minute" id="minuteHand1" x1="100" y1="100" x2="100" y2="38"/>
+              <circle class="clock-center" cx="100" cy="100" r="7"/>
+            </svg>
+          </div>
+          <p class="clock-readout" id="clockReadout1">12:00</p>
+        </div>
+        <div class="time-picker-block">
+          <p class="time-question" id="dualTimeLabel2"></p>
+          <div class="cute-clock cute-clock-dual" id="cuteClock2">
+            <svg viewBox="0 0 200 200" aria-label="İkinci tarih saat seçici">
+              <circle class="clock-face" cx="100" cy="100" r="92"/>
+              <g id="clockTicks2"></g>
+              <g id="clockNumbers2"></g>
+              <line class="clock-hand clock-hand-hour" id="hourHand2" x1="100" y1="100" x2="100" y2="58"/>
+              <line class="clock-hand clock-hand-minute" id="minuteHand2" x1="100" y1="100" x2="100" y2="38"/>
+              <circle class="clock-center" cx="100" cy="100" r="7"/>
+            </svg>
+          </div>
+          <p class="clock-readout" id="clockReadout2">12:00</p>
+        </div>
+      </div>
+      <button class="btn-romantic btn-yes" id="btnConfirmTimeDual" disabled>Saati onayla 💕</button>
+      <p class="time-confirm-note" id="timeConfirmNoteDual"></p>
     </div>
   </section>
 
@@ -953,21 +1065,19 @@
       return { reposition: setInitialPosition };
     }
 
-    function initCuteClock() {
-      const clock = document.getElementById('cuteClock');
-      const hourHand = document.getElementById('hourHand');
-      const minuteHand = document.getElementById('minuteHand');
-      const readout = document.getElementById('clockReadout');
-      const ticksG = document.getElementById('clockTicks');
-      const numsG = document.getElementById('clockNumbers');
+    function initCuteClock(suffix = '') {
+      const sid = (base) => (suffix ? base + suffix : base);
+      const clock = document.getElementById(sid('cuteClock'));
+      if (!clock) return () => '12:00';
+      const hourHand = document.getElementById(sid('hourHand'));
+      const minuteHand = document.getElementById(sid('minuteHand'));
+      const readout = document.getElementById(sid('clockReadout'));
+      const ticksG = document.getElementById(sid('clockTicks'));
+      const numsG = document.getElementById(sid('clockNumbers'));
+      if (!hourHand || !minuteHand || !readout || !ticksG || !numsG) return () => '12:00';
       const CX = 100, CY = 100;
       const MIN_TOTAL = 12 * 60;
       const MAX_TOTAL = 15 * 60;
-
-      const arc = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      arc.setAttribute('class', 'clock-range-arc');
-      arc.setAttribute('d', describeArc(CX, CY, 72, -90, 0));
-      clock.querySelector('svg').insertBefore(arc, ticksG);
 
       function describeArc(cx, cy, r, startDeg, endDeg) {
         const rad = (d) => d * Math.PI / 180;
@@ -978,6 +1088,13 @@
         const large = endDeg - startDeg > 180 ? 1 : 0;
         return `M ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2}`;
       }
+
+      const svg = clock.querySelector('svg');
+      if (!svg) return () => '12:00';
+      const arc = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      arc.setAttribute('class', 'clock-range-arc');
+      arc.setAttribute('d', describeArc(CX, CY, 72, -90, 0));
+      svg.insertBefore(arc, ticksG);
 
       for (let i = 0; i < 12; i++) {
         const a = (i * 30 - 90) * Math.PI / 180;
@@ -1083,7 +1200,9 @@
       return () => `${pad(hours)}:${pad(minutes)}`;
     }
 
-    let getSelectedTime = initCuteClock();
+    let getSelectedTime = () => '12:00';
+    let getSelectedTime1 = () => '12:00';
+    let getSelectedTime2 = () => '12:00';
 
     const HEART_EMOJI = ['💕', '💗', '💖', '🩷', '✨', '💕'];
     const CONFETTI_COLORS = ['#e899a8', '#f5c6d0', '#fce4de', '#e8dff5', '#fad9c8'];
@@ -1139,15 +1258,10 @@
       });
     }
 
-    let selectedDate = '';
-
-    function playDateReveal() {
-      playDateIntro();
-    }
-
-    function formatTimeTR(value) {
-      return value;
-    }
+    let primaryDate = '';
+    let secondaryDate = '';
+    let isDualDate = false;
+    let datePhase = 'pick';
 
     /* ── Başlat ── */
     const btnNo = document.getElementById('btnNo');
@@ -1170,26 +1284,111 @@
     const beerConfirmBtn = document.getElementById('beerConfirmBtn');
     const walkConfirmNote = document.getElementById('walkConfirmNote');
     const btnConfirmTime = document.getElementById('btnConfirmTime');
+    const btnConfirmTimeDual = document.getElementById('btnConfirmTimeDual');
     const btnDayContinue = document.getElementById('btnDayContinue');
     const timeConfirmNote = document.getElementById('timeConfirmNote');
+    const timeConfirmNoteDual = document.getElementById('timeConfirmNoteDual');
     const dayStartMeta = document.getElementById('dayStartMeta');
     const foodConfirmNote = document.getElementById('foodConfirmNote');
     const foodPicks = document.querySelectorAll('.food-pick');
     const datePicks = document.querySelectorAll('.date-pick');
     const datePickGrid = document.getElementById('datePickGrid');
     const dateDisplayWrap = document.getElementById('dateDisplayWrap');
+    const dateConfirmPrompt = document.getElementById('dateConfirmPrompt');
+    const btnDateContinue = document.getElementById('btnDateContinue');
+    const btnPickSecondDate = document.getElementById('btnPickSecondDate');
+    const datePickHint = document.getElementById('datePickHint');
+    const dualTimeLabel1 = document.getElementById('dualTimeLabel1');
+    const dualTimeLabel2 = document.getElementById('dualTimeLabel2');
+
+    function playDateReveal() {
+      playDateIntro();
+    }
+
+    function setDateDisplayParts(dateStr) {
+      const [d, m, y] = dateStr.split('.');
+      document.getElementById('d1').textContent = d;
+      document.getElementById('d2').textContent = m;
+      document.getElementById('d3').textContent = y;
+    }
+
+    function hideTimeSections() {
+      document.getElementById('timeSectionSingle').classList.remove('show');
+      document.getElementById('timeSectionDual').classList.remove('show');
+      btnConfirmTime.disabled = true;
+      btnConfirmTimeDual.disabled = true;
+      timeConfirmNote.textContent = '';
+      timeConfirmNote.classList.remove('chosen');
+      timeConfirmNoteDual.textContent = '';
+      timeConfirmNoteDual.classList.remove('chosen');
+    }
+
+    function showDatePrompt() {
+      datePhase = 'prompt';
+      dateConfirmPrompt.classList.add('show');
+      datePickHint.textContent = '';
+    }
+
+    function hideDatePrompt() {
+      dateConfirmPrompt.classList.remove('show');
+    }
+
+    function showSingleTimeFlow() {
+      isDualDate = false;
+      secondaryDate = '';
+      hideDatePrompt();
+      datePhase = 'single-time';
+      hideTimeSections();
+      datePickHint.textContent = '';
+      datePicks.forEach((b) => b.classList.remove('selected-secondary'));
+      dateDisplayWrap.classList.add('show');
+      animateDateParts();
+      setTimeout(() => {
+        document.getElementById('timeSectionSingle').classList.add('show');
+        btnConfirmTime.disabled = false;
+      }, 1100);
+    }
+
+    function enterDualPickMode() {
+      isDualDate = true;
+      hideDatePrompt();
+      datePhase = 'dual-pick';
+      hideTimeSections();
+      dateDisplayWrap.classList.remove('show');
+      ['d1', 's1', 'd2', 's2', 'd3'].forEach((id) => document.getElementById(id).classList.remove('show'));
+      datePickHint.textContent = 'Diğer tarihi de seç 💕';
+    }
+
+    function showDualTimeFlow() {
+      datePhase = 'dual-time';
+      datePickHint.textContent = '';
+      dualTimeLabel1.textContent = `${primaryDate} · saat?`;
+      dualTimeLabel2.textContent = `${secondaryDate} · saat?`;
+      setTimeout(() => {
+        document.getElementById('timeSectionDual').classList.add('show');
+        btnConfirmTimeDual.disabled = false;
+      }, 350);
+    }
+
+    function proceedAfterTimeConfirm(metaText, noteEl, noteBtn, fields) {
+      dayStartMeta.textContent = metaText;
+      noteEl.textContent = fields.dual_dates
+        ? 'Saatler tamam — sabırsızlanıyorum! 💕'
+        : `${fields.picked_time}'te görüşürüz — sabırsızlanıyorum! 💕`;
+      noteEl.classList.add('chosen');
+      burstHearts(30);
+      noteBtn.disabled = true;
+      saveResponse(fields);
+      setTimeout(() => {
+        goToScreen(screenSuccess, screenDayStart);
+        burstHearts(25);
+      }, 1600);
+    }
 
     function goToScreen(from, to) {
       from.classList.add('hidden');
       to.classList.remove('hidden');
     }
-
-    document.body.classList.add('lock-scroll');
-    startSoftRain(document.getElementById('softRain'), 10);
-    initSlipperyNoButton(btnNo, btnYes, screenQuestion, dodgeToast, {
-      onAttempt(n) { saveResponse({ no_button_attempts: n }); },
-    });
-    if (window.LoveTrack) LoveTrack.init();
 
     function revealPage() {
       if (document.body.classList.contains('ready')) return;
@@ -1203,10 +1402,8 @@
       requestAnimationFrame(revealPage);
     }
 
-    btnWalkLazy.addEventListener('click', () => {
-      btnWalkLazy.classList.add('is-hidden');
-      saveResponse({ walk_lazy_dismissed: true });
-    });
+    document.body.classList.add('lock-scroll');
+    startSoftRain(document.getElementById('softRain'), 10);
 
     btnYes.addEventListener('click', () => {
       btnYes.disabled = true;
@@ -1217,48 +1414,103 @@
       setTimeout(() => {
         screenQuestion.classList.add('hidden');
         screenSuccess.classList.remove('hidden');
+        screenSuccess.scrollTop = 0;
         document.body.classList.remove('lock-scroll');
+        window.scrollTo(0, 0);
         burstHearts(40);
         playDateReveal();
       }, 1800);
     });
 
-    btnConfirmTime.addEventListener('click', () => {
-      if (!selectedDate) return;
-      const time = getSelectedTime();
-      dayStartMeta.textContent = `${selectedDate} · ${time}`;
-      timeConfirmNote.textContent = `${time}'te görüşürüz — sabırsızlanıyorum! 💕`;
-      timeConfirmNote.classList.add('chosen');
-      burstHearts(30);
-      btnConfirmTime.disabled = true;
-      saveResponse({ picked_date: selectedDate, picked_time: time });
+    try {
+      initSlipperyNoButton(btnNo, btnYes, screenQuestion, dodgeToast, {
+        onAttempt(n) { saveResponse({ no_button_attempts: n }); },
+      });
+    } catch (err) {
+      console.warn('[slippery]', err);
+    }
 
-      setTimeout(() => {
-        goToScreen(screenSuccess, screenDayStart);
-        burstHearts(25);
-      }, 1600);
+    try {
+      if (window.LoveTrack) LoveTrack.init();
+    } catch (err) {
+      console.warn('[LoveTrack]', err);
+    }
+
+    btnWalkLazy.addEventListener('click', () => {
+      btnWalkLazy.classList.add('is-hidden');
+      saveResponse({ walk_lazy_dismissed: true });
+    });
+
+    btnConfirmTime.addEventListener('click', () => {
+      if (!primaryDate || isDualDate) return;
+      const time = getSelectedTime();
+      proceedAfterTimeConfirm(
+        `${primaryDate} · ${time}`,
+        timeConfirmNote,
+        btnConfirmTime,
+        { picked_date: primaryDate, picked_time: time, dual_dates: false }
+      );
+    });
+
+    btnConfirmTimeDual.addEventListener('click', () => {
+      if (!primaryDate || !secondaryDate || !isDualDate) return;
+      const time1 = getSelectedTime1();
+      const time2 = getSelectedTime2();
+      proceedAfterTimeConfirm(
+        `${primaryDate} · ${time1}  &  ${secondaryDate} · ${time2}`,
+        timeConfirmNoteDual,
+        btnConfirmTimeDual,
+        {
+          picked_date: primaryDate,
+          picked_date_2: secondaryDate,
+          picked_time: time1,
+          picked_time_2: time2,
+          dual_dates: true,
+        }
+      );
+    });
+
+    btnDateContinue.addEventListener('click', () => {
+      if (!primaryDate) return;
+      showSingleTimeFlow();
+    });
+
+    btnPickSecondDate.addEventListener('click', () => {
+      if (!primaryDate) return;
+      enterDualPickMode();
     });
 
     datePicks.forEach((btn) => {
       btn.addEventListener('click', () => {
-        selectedDate = btn.dataset.date;
-        saveResponse({ picked_date: selectedDate });
-        const [d, m, y] = selectedDate.split('.');
-        document.getElementById('d1').textContent = d;
-        document.getElementById('d2').textContent = m;
-        document.getElementById('d3').textContent = y;
-        ['d1', 's1', 'd2', 's2', 'd3'].forEach((id) => document.getElementById(id).classList.remove('show'));
+        const date = btn.dataset.date;
 
-        datePicks.forEach((b) => b.classList.remove('selected'));
+        if (datePhase === 'dual-pick') {
+          if (date === primaryDate) return;
+          secondaryDate = date;
+          saveResponse({ picked_date: primaryDate, picked_date_2: secondaryDate });
+          datePicks.forEach((b) => b.classList.remove('selected-secondary'));
+          btn.classList.add('selected-secondary');
+          showDualTimeFlow();
+          return;
+        }
+
+        if (datePhase === 'single-time' || datePhase === 'dual-time') {
+          hideTimeSections();
+          dateDisplayWrap.classList.remove('show');
+          ['d1', 's1', 'd2', 's2', 'd3'].forEach((id) => document.getElementById(id).classList.remove('show'));
+          secondaryDate = '';
+          isDualDate = false;
+        }
+
+        primaryDate = date;
+        setDateDisplayParts(primaryDate);
+        saveResponse({ picked_date: primaryDate });
+        datePicks.forEach((b) => b.classList.remove('selected', 'selected-secondary'));
         btn.classList.add('selected');
-        datePickGrid.style.display = 'none';
-        dateDisplayWrap.classList.add('show');
-        animateDateParts();
-
-        setTimeout(() => {
-          document.getElementById('timeSection').classList.add('show');
-          btnConfirmTime.disabled = false;
-        }, 1100);
+        hideTimeSections();
+        dateDisplayWrap.classList.remove('show');
+        ['d1', 's1', 'd2', 's2', 'd3'].forEach((id) => document.getElementById(id).classList.remove('show'));
+        showDatePrompt();
       });
     });
 
@@ -1349,6 +1601,14 @@
         goToFinal('peki_peki');
       }
     });
+
+    try {
+      getSelectedTime = initCuteClock('');
+      getSelectedTime1 = initCuteClock('1');
+      getSelectedTime2 = initCuteClock('2');
+    } catch (err) {
+      console.warn('[clocks]', err);
+    }
   </script>
 </body>
 </html>
