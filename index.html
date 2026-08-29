@@ -93,6 +93,46 @@
       max-width: 520px;
     }
 
+    .question-title {
+      line-height: 1.25;
+      text-align: center;
+    }
+
+    .q-part {
+      display: inline-block;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    body.ready .q-part {
+      animation: fade-in-up 0.95s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    body.ready .q-part-1 { animation-delay: 0.55s; }
+    body.ready .q-part-2 { animation-delay: 1.45s; }
+    body.ready .q-part-3 { animation-delay: 2.35s; }
+
+    #btnZone {
+      opacity: 0;
+    }
+
+    body.ready #btnZone {
+      animation: fade-soft 0.85s ease forwards;
+      animation-delay: 3.35s;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .q-part {
+        opacity: 1;
+        transform: none;
+      }
+      body.ready .q-part { animation: none; }
+      body.ready #btnZone {
+        animation: none;
+        opacity: 1;
+      }
+    }
+
     .subtitle {
       font-family: var(--font-handwriting);
       font-size: clamp(1.3rem, 3.5vw, 1.8rem);
@@ -412,6 +452,93 @@
       pointer-events: none;
     }
 
+    .food-sub-picker {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1.25rem;
+    }
+
+    .food-sub-picker.show {
+      display: flex;
+    }
+
+    .food-sub-picker-backdrop {
+      position: absolute;
+      inset: 0;
+      border: none;
+      padding: 0;
+      background: rgba(45, 28, 38, 0.48);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      cursor: pointer;
+    }
+
+    .food-sub-picker-panel {
+      position: relative;
+      z-index: 1;
+      width: min(720px, 94vw);
+      padding: 1.5rem 1.25rem 1.75rem;
+      border-radius: var(--radius-lg);
+      background: rgba(255, 255, 255, 0.92);
+      border: 1px solid rgba(255, 255, 255, 0.95);
+      box-shadow: 0 24px 64px rgba(92, 74, 82, 0.28);
+      animation: fade-in-scale 0.45s ease forwards;
+      pointer-events: auto;
+    }
+
+    .food-sub-picker-title {
+      font-family: var(--font-handwriting);
+      font-size: clamp(1.55rem, 4.2vw, 2.1rem);
+      color: var(--color-rose-deep);
+      margin-bottom: 1.25rem;
+    }
+
+    .food-sub-picker-grid {
+      display: flex;
+      gap: 1.15rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .food-sub-pick {
+      flex: 1 1 240px;
+      max-width: 300px;
+      padding: 0;
+      border: 3px solid rgba(255, 255, 255, 0.9);
+      border-radius: var(--radius-lg);
+      background: white;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform var(--transition-bounce), box-shadow var(--transition-smooth), border-color var(--transition-smooth);
+      box-shadow: var(--shadow-card);
+    }
+
+    .food-sub-pick:hover {
+      transform: translateY(-6px) scale(1.04);
+      box-shadow: var(--shadow-glow);
+      border-color: var(--color-rose);
+    }
+
+    .food-sub-pick img {
+      width: 100%;
+      height: min(240px, 46vw);
+      object-fit: cover;
+      display: block;
+      pointer-events: none;
+    }
+
+    .food-sub-pick span {
+      display: block;
+      padding: 0.9rem 0.5rem 1rem;
+      font-family: var(--font-romantic);
+      font-size: 1.4rem;
+      color: var(--color-text-romantic);
+    }
+
     .food-confirm-note {
       font-family: var(--font-handwriting);
       font-size: 1.35rem;
@@ -591,8 +718,12 @@
 
   <!-- Ekran 1: Soru -->
   <section class="screen bg-evening" id="screenQuestion">
-    <div class="question-wrap animate-fade-in-up delay-1">
-      <h1 class="text-romantic"><em>Eda</em>, benimle<br>bir date'e çıkar mısın?</h1>
+    <div class="question-wrap">
+      <h1 class="text-romantic question-title">
+        <span class="q-part q-part-1"><em>Eda</em>,</span>
+        <span class="q-part q-part-2"> benimle</span><br>
+        <span class="q-part q-part-3">bir date'e çıkar mısın?</span>
+      </h1>
     </div>
 
     <p class="dodge-toast" id="dodgeToast" aria-live="polite"></p>
@@ -600,7 +731,7 @@
       Biraz düşüneyim 🙈
     </button>
 
-    <div class="btn-zone animate-fade-soft delay-3" id="btnZone">
+    <div class="btn-zone" id="btnZone">
       <button class="btn-romantic btn-yes btn-yes-main animate-pulse-glow" id="btnYes">
         Evet Çıkarrmmm 💕
       </button>
@@ -719,6 +850,57 @@
       </button>
     </div>
     <p class="food-confirm-note" id="foodConfirmNote"></p>
+
+    <div class="food-sub-picker" id="pizzaPicker" aria-hidden="true">
+      <button type="button" class="food-sub-picker-backdrop" id="pizzaPickerBackdrop" aria-label="Kapat"></button>
+      <div class="food-sub-picker-panel" role="dialog" aria-labelledby="pizzaPickerTitle">
+        <p class="food-sub-picker-title" id="pizzaPickerTitle">Hangisi olsun? 🍕</p>
+        <div class="food-sub-picker-grid">
+          <button type="button" class="food-sub-pick" data-sub="marco_pizzeria" id="pickMarcoPizzeria">
+            <img src="assets/images/marco-pizzeria.jpg?v=1" alt="Marco Pizzeria" width="300" height="240" decoding="async">
+            <span>Marco Pizzeria</span>
+          </button>
+          <button type="button" class="food-sub-pick" data-sub="il_forno" id="pickIlForno">
+            <img src="assets/images/il-forno.jpg?v=1" alt="Il Forno" width="300" height="240" decoding="async">
+            <span>Il Forno</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="food-sub-picker" id="burgerPicker" aria-hidden="true">
+      <button type="button" class="food-sub-picker-backdrop" id="burgerPickerBackdrop" aria-label="Kapat"></button>
+      <div class="food-sub-picker-panel" role="dialog" aria-labelledby="burgerPickerTitle">
+        <p class="food-sub-picker-title" id="burgerPickerTitle">Hangisi olsun? 🍔</p>
+        <div class="food-sub-picker-grid">
+          <button type="button" class="food-sub-pick" data-sub="el_dorado" id="pickElDorado">
+            <img src="assets/images/el-dorado.jfif?v=1" alt="El Dorado" width="300" height="240" decoding="async">
+            <span>El Dorado</span>
+          </button>
+          <button type="button" class="food-sub-pick" data-sub="snob" id="pickSnob">
+            <img src="assets/images/snob.webp?v=1" alt="Snob" width="300" height="240" decoding="async">
+            <span>Snob</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="food-sub-picker" id="sushiPicker" aria-hidden="true">
+      <button type="button" class="food-sub-picker-backdrop" id="sushiPickerBackdrop" aria-label="Kapat"></button>
+      <div class="food-sub-picker-panel" role="dialog" aria-labelledby="sushiPickerTitle">
+        <p class="food-sub-picker-title" id="sushiPickerTitle">Hangisi olsun? 🍣</p>
+        <div class="food-sub-picker-grid">
+          <button type="button" class="food-sub-pick" data-sub="sushico" id="pickSushico">
+            <img src="assets/images/sushico.jpg?v=1" alt="Sushico" width="300" height="240" decoding="async">
+            <span>Sushico</span>
+          </button>
+          <button type="button" class="food-sub-pick" data-sub="boyang" id="pickBoyang">
+            <img src="assets/images/boyang.webp?v=1" alt="Boyang" width="300" height="240" decoding="async">
+            <span>Boyang</span>
+          </button>
+        </div>
+      </div>
+    </div>
   </section>
 
   <!-- Ekran 5: Kanlıkavak yürüyüşü -->
@@ -1290,7 +1472,16 @@
     const timeConfirmNoteDual = document.getElementById('timeConfirmNoteDual');
     const dayStartMeta = document.getElementById('dayStartMeta');
     const foodConfirmNote = document.getElementById('foodConfirmNote');
-    const foodPicks = document.querySelectorAll('.food-pick');
+    const foodGridPicks = document.querySelectorAll('#screenFoodChoice .food-pick-grid .food-pick');
+    const pickPizza = document.getElementById('pickPizza');
+    const pickBurger = document.getElementById('pickBurger');
+    const pickSushi = document.getElementById('pickSushi');
+    const pizzaPicker = document.getElementById('pizzaPicker');
+    const pizzaPickerBackdrop = document.getElementById('pizzaPickerBackdrop');
+    const burgerPicker = document.getElementById('burgerPicker');
+    const burgerPickerBackdrop = document.getElementById('burgerPickerBackdrop');
+    const sushiPicker = document.getElementById('sushiPicker');
+    const sushiPickerBackdrop = document.getElementById('sushiPickerBackdrop');
     const datePicks = document.querySelectorAll('.date-pick');
     const datePickGrid = document.getElementById('datePickGrid');
     const dateDisplayWrap = document.getElementById('dateDisplayWrap');
@@ -1524,25 +1715,90 @@
 
     let foodChosen = false;
 
-    foodPicks.forEach((btn) => {
+    const foodSubLabels = {
+      marco_pizzeria: 'Marco Pizzeria',
+      il_forno: 'Il Forno',
+      el_dorado: 'El Dorado',
+      snob: 'Snob',
+      sushico: 'Sushico',
+      boyang: 'Boyang',
+    };
+
+    function closeFoodSubPickers() {
+      [pizzaPicker, burgerPicker, sushiPicker].forEach((picker) => {
+        picker.classList.remove('show');
+        picker.setAttribute('aria-hidden', 'true');
+      });
+      pickPizza.classList.remove('selected');
+      pickBurger.classList.remove('selected');
+      pickSushi.classList.remove('selected');
+    }
+
+    function openFoodSubPicker(picker, mainBtn) {
+      if (foodChosen) return;
+      closeFoodSubPickers();
+      picker.classList.add('show');
+      picker.setAttribute('aria-hidden', 'false');
+      foodGridPicks.forEach((b) => b.classList.remove('selected'));
+      mainBtn.classList.add('selected');
+    }
+
+    function finalizeFoodChoice(label, foodValue) {
+      if (foodChosen) return;
+      foodChosen = true;
+      closeFoodSubPickers();
+      foodGridPicks.forEach((b) => b.classList.remove('selected'));
+      const base = foodValue.split('_')[0];
+      const mainBtn = document.querySelector(`#screenFoodChoice .food-pick[data-food="${base}"]`);
+      if (mainBtn) mainBtn.classList.add('selected');
+      foodConfirmNote.textContent = `${label} dedin — harika seçim! 💕`;
+      saveResponse({ food_choice: foodValue });
+      burstHearts(25);
+
+      setTimeout(() => {
+        goToScreen(screenFoodChoice, screenWalkChoice);
+        document.body.classList.add('lock-scroll');
+        burstHearts(20);
+      }, 1600);
+    }
+
+    function bindFoodSubPicker(picker, backdrop, mainType, mainBtn) {
+      backdrop.addEventListener('click', closeFoodSubPickers);
+      picker.querySelector('.food-sub-picker-panel').addEventListener('click', (e) => {
+        e.stopPropagation();
+      });
+      picker.querySelectorAll('.food-sub-pick').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          if (foodChosen) return;
+          const sub = btn.dataset.sub;
+          const label = foodSubLabels[sub] || sub;
+          finalizeFoodChoice(label, `${mainType}_${sub}`);
+        });
+      });
+    }
+
+    foodGridPicks.forEach((btn) => {
       btn.addEventListener('click', () => {
         if (foodChosen) return;
-        foodChosen = true;
-        foodPicks.forEach((b) => b.classList.remove('selected'));
-        btn.classList.add('selected');
-        const labels = { pizza: 'Pizza', burger: 'Burger', sushi: 'Sushi' };
-        const label = labels[btn.dataset.food] || btn.dataset.food;
-        foodConfirmNote.textContent = `${label} dedin — harika seçim! 💕`;
-        saveResponse({ food_choice: btn.dataset.food });
-        burstHearts(25);
-
-        setTimeout(() => {
-          goToScreen(screenFoodChoice, screenWalkChoice);
-          document.body.classList.add('lock-scroll');
-          burstHearts(20);
-        }, 1600);
+        const food = btn.dataset.food;
+        if (food === 'pizza') {
+          openFoodSubPicker(pizzaPicker, pickPizza);
+          return;
+        }
+        if (food === 'burger') {
+          openFoodSubPicker(burgerPicker, pickBurger);
+          return;
+        }
+        if (food === 'sushi') {
+          openFoodSubPicker(sushiPicker, pickSushi);
+          return;
+        }
       });
     });
+
+    bindFoodSubPicker(pizzaPicker, pizzaPickerBackdrop, 'pizza', pickPizza);
+    bindFoodSubPicker(burgerPicker, burgerPickerBackdrop, 'burger', pickBurger);
+    bindFoodSubPicker(sushiPicker, sushiPickerBackdrop, 'sushi', pickSushi);
 
     btnWalkYes.addEventListener('click', () => {
       btnWalkYes.disabled = true;
