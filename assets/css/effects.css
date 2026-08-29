@@ -1,0 +1,129 @@
+/* 💗 LoveApp — Sweet romantic efektler */
+
+.bg-romantic { background: var(--gradient-romantic); min-height: 100vh; }
+.bg-date { background: var(--gradient-date); background-size: 200% 200%; min-height: 100vh; }
+.bg-evening { background: var(--gradient-evening); min-height: 100vh; }
+
+.glass {
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+
+.sticker {
+  display: inline-block;
+  filter: drop-shadow(0 3px 6px rgba(92, 74, 82, 0.14));
+  --tilt: -5deg;
+  transform: rotate(var(--tilt));
+  transition: transform var(--transition-bounce);
+}
+
+.sticker:hover { transform: rotate(0deg) scale(1.08); }
+.sticker img, .sticker svg { display: block; width: 100%; height: 100%; }
+
+.sticker-sm { width: 56px; height: 56px; }
+.sticker-md { width: 80px; height: 80px; }
+.sticker-lg { width: 110px; height: 110px; }
+
+.sticker-tilt-left { --tilt: -8deg; }
+.sticker-tilt-right { --tilt: 7deg; }
+.sticker-tilt-far { --tilt: -14deg; }
+
+.sticker-scene {
+  position: relative;
+  width: min(340px, 90vw);
+  height: 200px;
+  margin: 0 auto;
+}
+
+.sticker-scene .sticker { position: absolute; }
+.sticker-scene .sticker:nth-child(1) { top: 10%; left: 5%; }
+.sticker-scene .sticker:nth-child(2) { top: 0; right: 10%; }
+.sticker-scene .sticker:nth-child(3) { bottom: 5%; left: 25%; }
+.sticker-scene .sticker:nth-child(4) { bottom: 15%; right: 5%; }
+
+.btn-romantic {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 1.05rem;
+  padding: 13px 30px;
+  border: none;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: transform var(--transition-bounce), box-shadow var(--transition-smooth);
+  box-shadow: var(--shadow-soft);
+}
+
+.btn-romantic:hover {
+  transform: scale(1.06) translateY(-2px);
+  box-shadow: var(--shadow-glow);
+}
+
+.btn-yes { background: var(--gradient-btn); color: white; }
+
+.btn-no {
+  background: rgba(255, 255, 255, 0.75);
+  color: var(--color-text-soft);
+  border: 2px solid var(--color-rose-light);
+}
+
+.soft-rain {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: var(--z-particles);
+}
+
+.rain-particle {
+  position: absolute;
+  opacity: 0.6;
+  animation: drift-down linear infinite;
+  user-select: none;
+}
+
+.confetti-piece {
+  position: fixed;
+  top: -10px;
+  pointer-events: none;
+  z-index: var(--z-particles);
+  animation: drift-down linear forwards;
+}
+
+.text-romantic {
+  font-family: var(--font-romantic);
+  font-size: clamp(2rem, 5.5vw, 3.4rem);
+  font-weight: 600;
+  color: var(--color-text-romantic);
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+}
+
+.text-romantic em {
+  font-style: italic;
+  color: var(--color-rose-deep);
+}
+
+.text-handwriting {
+  font-family: var(--font-handwriting);
+  font-size: clamp(1.5rem, 3.8vw, 2.3rem);
+  color: var(--color-rose-deep);
+}
+
+.text-body {
+  font-family: var(--font-body);
+  font-size: 1.05rem;
+  line-height: 1.75;
+  color: var(--color-text);
+}
+
+.romantic-card {
+  padding: 2.5rem 2rem;
+  max-width: 440px;
+  text-align: center;
+}
+
+.hidden-init { opacity: 0; }

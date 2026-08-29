@@ -1,0 +1,1354 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sana bir sorum var...</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Quicksand:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="assets/css/variables.css">
+  <link rel="stylesheet" href="assets/css/animations.css">
+  <link rel="stylesheet" href="assets/css/effects.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html {
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+      background: var(--gradient-evening);
+    }
+
+    body {
+      font-family: var(--font-body);
+      overflow-x: hidden;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      -webkit-tap-highlight-color: transparent;
+      opacity: 0;
+      transition: opacity 0.6s ease;
+    }
+
+    body.ready { opacity: 1; }
+
+    /* Sayfa görünür olmadan giriş animasyonları boşa akmasın. */
+    body:not(.ready) [class*="animate-"] { animation-play-state: paused; }
+
+    body.lock-scroll { overflow: hidden; }
+
+    @keyframes fade-soft {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* Longhand: .delay-* sınıflarının animation-delay değerini ezmemesi için. */
+    .animate-fade-soft {
+      animation-name: fade-soft;
+      animation-duration: 0.7s;
+      animation-timing-function: ease;
+      animation-fill-mode: both;
+    }
+
+    .screen {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1.25rem;
+      text-align: center;
+      gap: 1.25rem;
+      transition: opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+                  transform 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+                  visibility 0.65s linear;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+    }
+
+    .screen.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transform: scale(1.04);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      body { transition-duration: 0.01ms; }
+      .screen { transition-duration: 0.01ms; }
+      .screen.hidden { transform: none; }
+    }
+
+    .question-wrap {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      max-width: 520px;
+    }
+
+    .subtitle {
+      font-family: var(--font-handwriting);
+      font-size: clamp(1.3rem, 3.5vw, 1.8rem);
+      color: var(--color-text-soft);
+    }
+
+    #screenQuestion {
+      position: fixed;
+      overflow: visible;
+    }
+
+    .btn-zone {
+      position: relative;
+      z-index: 2;
+      margin-top: 0.75rem;
+    }
+
+    .btn-yes-main {
+      position: relative;
+      z-index: 2;
+    }
+
+    .btn-slippery {
+      position: absolute;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 50;
+      white-space: nowrap;
+      user-select: none;
+      touch-action: none;
+      opacity: 0;
+      transition: left 0.42s ease-out, top 0.42s ease-out, opacity 0.6s ease 0.75s;
+    }
+
+    /* Konum anında ayarlanır, görünürlük yine yumuşak gelir. */
+    .btn-slippery.no-transition {
+      transition: opacity 0.6s ease 0.75s;
+    }
+
+    .btn-slippery:not(.is-placed) {
+      visibility: hidden;
+    }
+
+    body.ready .btn-slippery.is-placed {
+      opacity: 1;
+    }
+
+    .dodge-toast {
+      position: absolute;
+      top: 1.25rem;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: var(--font-handwriting);
+      font-size: 1.25rem;
+      color: var(--color-rose-deep);
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity 0.35s ease;
+      pointer-events: none;
+      z-index: 51;
+    }
+
+    .dodge-toast.show { opacity: 1; }
+
+    .success-msg {
+      font-family: var(--font-handwriting);
+      font-size: clamp(1.6rem, 4vw, 2.2rem);
+      color: var(--color-rose-deep);
+    }
+
+    .date-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .date-label {
+      font-family: var(--font-handwriting);
+      font-size: clamp(1.4rem, 3.5vw, 1.9rem);
+      color: var(--color-text-soft);
+      opacity: 0;
+    }
+
+    .date-label.show {
+      animation: fade-in-up 0.7s ease forwards;
+    }
+
+    .date-display {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.1em;
+      font-family: var(--font-romantic);
+      font-size: clamp(2.4rem, 9vw, 4.2rem);
+      font-weight: 600;
+      color: var(--color-text-romantic);
+      line-height: 1;
+    }
+
+    .date-part,
+    .date-sep {
+      opacity: 0;
+      display: inline-block;
+    }
+
+    .date-part.show,
+    .date-sep.show {
+      animation: date-pop 0.65s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+    }
+
+    .date-sep {
+      color: var(--color-rose);
+      margin: 0 0.05em;
+    }
+
+    @keyframes date-pop {
+      0% { opacity: 0; transform: translateY(24px) scale(0.7); }
+      65% { transform: translateY(-6px) scale(1.08); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .time-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      margin-top: 0.5rem;
+      opacity: 0;
+      transform: translateY(16px);
+      pointer-events: none;
+    }
+
+    .time-section.show {
+      animation: fade-in-up 0.8s ease forwards;
+      pointer-events: auto;
+    }
+
+    .time-question {
+      font-family: var(--font-handwriting);
+      font-size: clamp(1.5rem, 4vw, 2rem);
+      color: var(--color-rose-deep);
+    }
+
+    .time-picker-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .cute-clock {
+      position: relative;
+      width: min(240px, 72vw);
+      height: min(240px, 72vw);
+      touch-action: none;
+    }
+
+    .cute-clock svg {
+      width: 100%;
+      height: 100%;
+      filter: drop-shadow(0 6px 18px rgba(212, 115, 138, 0.2));
+    }
+
+    .clock-face {
+      fill: rgba(255, 255, 255, 0.82);
+      stroke: var(--color-rose-light);
+      stroke-width: 3;
+    }
+
+    .clock-tick {
+      stroke: var(--color-rose);
+      stroke-width: 2;
+      stroke-linecap: round;
+      opacity: 0.45;
+    }
+
+    .clock-number {
+      font-family: var(--font-body);
+      font-size: 11px;
+      font-weight: 600;
+      fill: var(--color-text-soft);
+      text-anchor: middle;
+      dominant-baseline: middle;
+    }
+
+    .clock-number-disabled,
+    .clock-tick-disabled {
+      opacity: 0.16;
+    }
+
+    .clock-range-arc {
+      fill: none;
+      stroke: var(--color-rose-light);
+      stroke-width: 14;
+      stroke-linecap: round;
+      opacity: 0.35;
+    }
+
+    .clock-hand {
+      stroke-linecap: round;
+      cursor: grab;
+    }
+
+    .clock-hand:active { cursor: grabbing; }
+
+    .clock-hand-hour {
+      stroke: var(--color-rose-deep);
+      stroke-width: 5;
+    }
+
+    .clock-hand-minute {
+      stroke: var(--color-rose);
+      stroke-width: 3.5;
+    }
+
+    .clock-center {
+      fill: var(--color-rose-deep);
+    }
+
+    .clock-readout {
+      font-family: var(--font-romantic);
+      font-size: 1.6rem;
+      color: var(--color-text-romantic);
+      margin-top: 0.25rem;
+    }
+
+    .time-confirm-note {
+      font-size: 0.95rem;
+      color: var(--color-text-soft);
+      min-height: 1.4em;
+    }
+
+    .time-confirm-note.chosen {
+      font-family: var(--font-handwriting);
+      font-size: 1.3rem;
+      color: var(--color-rose-deep);
+    }
+
+    .day-meta {
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      color: var(--color-text-soft);
+      letter-spacing: 0.04em;
+    }
+
+    .activity-card {
+      padding: 2rem 1.75rem;
+      max-width: 380px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .activity-emoji {
+      font-size: 3rem;
+      line-height: 1;
+    }
+
+    .activity-gif {
+      width: 120px;
+      height: 120px;
+      object-fit: contain;
+      display: block;
+    }
+
+    .activity-img {
+      width: 120px;
+      height: 120px;
+      object-fit: contain;
+      display: block;
+    }
+
+    .food-pick-grid {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      width: min(540px, 94vw);
+    }
+
+    .food-pick {
+      flex: 1 1 140px;
+      max-width: 160px;
+      padding: 1rem 0.75rem 1.1rem;
+      border: 2px solid rgba(255, 255, 255, 0.7);
+      border-radius: var(--radius-lg);
+      background: rgba(255, 255, 255, 0.48);
+      cursor: pointer;
+      transition: transform var(--transition-bounce), box-shadow var(--transition-smooth), border-color var(--transition-smooth);
+      font-family: var(--font-body);
+      font-weight: 600;
+      font-size: 1rem;
+      color: var(--color-text);
+    }
+
+    .food-pick:hover {
+      transform: translateY(-4px) scale(1.03);
+      box-shadow: var(--shadow-glow);
+    }
+
+    .food-pick.selected {
+      border-color: var(--color-rose);
+      box-shadow: var(--shadow-glow);
+      background: rgba(255, 255, 255, 0.72);
+    }
+
+    .food-pick img {
+      width: 120px;
+      height: 120px;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto 0.65rem;
+      pointer-events: none;
+    }
+
+    .food-confirm-note {
+      font-family: var(--font-handwriting);
+      font-size: 1.35rem;
+      color: var(--color-rose-deep);
+      min-height: 1.5em;
+    }
+
+    .date-pick-grid {
+      display: flex;
+      gap: 0.85rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      opacity: 0;
+      transform: translateY(12px);
+    }
+
+    .date-pick-grid.show {
+      animation: fade-in-up 0.7s ease forwards;
+    }
+
+    .date-pick {
+      padding: 0.85rem 1.25rem;
+      border: 2px solid rgba(255, 255, 255, 0.7);
+      border-radius: var(--radius-full);
+      background: rgba(255, 255, 255, 0.48);
+      font-family: var(--font-romantic);
+      font-size: 1.25rem;
+      color: var(--color-text-romantic);
+      cursor: pointer;
+      transition: transform var(--transition-bounce), box-shadow var(--transition-smooth), border-color var(--transition-smooth);
+    }
+
+    .date-pick:hover {
+      transform: scale(1.05);
+      box-shadow: var(--shadow-glow);
+    }
+
+    .date-pick.selected {
+      border-color: var(--color-rose);
+      background: rgba(255, 255, 255, 0.75);
+      box-shadow: var(--shadow-glow);
+    }
+
+    #dateDisplayWrap:not(.show) {
+      display: none;
+    }
+
+    #dateDisplayWrap.show {
+      animation: fade-in-scale 0.6s ease forwards;
+    }
+
+    #screenWalkChoice {
+      overflow: visible;
+    }
+
+    .walk-pick-grid {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: nowrap;
+      justify-content: center;
+      width: min(360px, 94vw);
+    }
+
+    .walk-pick-grid .food-pick {
+      flex: 1 1 140px;
+      max-width: 160px;
+    }
+
+    .walk-lazy-pick {
+      transition: opacity 0.45s ease, transform 0.45s ease;
+    }
+
+    .walk-lazy-pick.is-hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(0.85);
+    }
+
+    .beer-pick-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      align-items: center;
+      width: min(320px, 94vw);
+    }
+
+    .beer-confirm {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      text-align: center;
+    }
+
+    .beer-confirm.show {
+      display: flex;
+    }
+
+    .beer-confirm-text {
+      font-family: var(--font-handwriting);
+      font-size: clamp(1.5rem, 4vw, 2rem);
+      color: var(--color-rose-deep);
+    }
+
+    .walk-done-msg {
+      font-family: var(--font-handwriting);
+      font-size: clamp(1.5rem, 4vw, 2rem);
+      color: var(--color-rose-deep);
+      min-height: 1.5em;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ekran 1: Soru -->
+  <section class="screen bg-evening" id="screenQuestion">
+    <div class="question-wrap animate-fade-in-up delay-1">
+      <h1 class="text-romantic"><em>Eda</em>, benimle<br>bir date'e çıkar mısın?</h1>
+    </div>
+
+    <p class="dodge-toast" id="dodgeToast" aria-live="polite"></p>
+    <button class="btn-romantic btn-no btn-slippery" id="btnNo">
+      Biraz düşüneyim 🙈
+    </button>
+
+    <div class="btn-zone animate-fade-soft delay-3" id="btnZone">
+      <button class="btn-romantic btn-yes btn-yes-main animate-pulse-glow" id="btnYes">
+        Evet Çıkarrmmm 💕
+      </button>
+    </div>
+  </section>
+
+  <!-- Ekran 2: Tarih & saat -->
+  <section class="screen bg-date hidden" id="screenSuccess">
+    <p class="success-msg" id="successMsg">Harika! Çok mutlu oldum 💗</p>
+
+    <div class="date-block" id="dateBlock">
+      <p class="date-label" id="dateLabel">Date günümüz</p>
+      <div class="date-pick-grid" id="datePickGrid">
+        <button type="button" class="date-pick" data-date="05.09.2026">05.09.2026</button>
+        <button type="button" class="date-pick" data-date="12.09.2026">12.09.2026</button>
+      </div>
+      <div class="date-display" id="dateDisplayWrap" aria-live="polite">
+        <span class="date-part" id="d1">12</span>
+        <span class="date-sep" id="s1">.</span>
+        <span class="date-part" id="d2">09</span>
+        <span class="date-sep" id="s2">.</span>
+        <span class="date-part" id="d3">2026</span>
+      </div>
+    </div>
+
+    <div class="time-section" id="timeSection">
+      <p class="time-question">Date'e ne zaman başlıyoruz?</p>
+      <div class="time-picker-wrap">
+        <div class="cute-clock" id="cuteClock">
+          <svg viewBox="0 0 200 200" aria-label="Saat seçici">
+            <circle class="clock-face" cx="100" cy="100" r="92"/>
+            <g id="clockTicks"></g>
+            <g id="clockNumbers"></g>
+            <line class="clock-hand clock-hand-hour" id="hourHand" x1="100" y1="100" x2="100" y2="58"/>
+            <line class="clock-hand clock-hand-minute" id="minuteHand" x1="100" y1="100" x2="100" y2="38"/>
+            <circle class="clock-center" cx="100" cy="100" r="7"/>
+          </svg>
+        </div>
+        <p class="clock-readout" id="clockReadout">12:00</p>
+        <button class="btn-romantic btn-yes" id="btnConfirmTime" disabled>Saati onayla 💕</button>
+        <p class="time-confirm-note" id="timeConfirmNote"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Ekran 3: Gün başlasın + kahve -->
+  <section class="screen bg-romantic hidden" id="screenDayStart">
+    <p class="day-meta animate-fade-in-up" id="dayStartMeta">12.09.2026 · 12:00</p>
+    <h2 class="text-romantic animate-fade-in-up delay-2">O zaman<br><em>gün başlasın</em> ☀️</h2>
+    <div class="glass activity-card animate-fade-in-scale delay-3">
+      <img class="activity-gif" src="assets/images/coffee.gif?v=1" alt="Kahve animasyonu" width="120" height="120" decoding="async" fetchpriority="low">
+      <p class="text-handwriting" style="font-size: 1.75rem;">İlk durak: kahve & sohbet</p>
+    </div>
+    <button class="btn-romantic btn-yes animate-fade-in-up delay-4" id="btnDayContinue">Devam edelim 💕</button>
+  </section>
+
+  <!-- Ekran 4: Yemek seçimi -->
+  <section class="screen bg-evening hidden" id="screenFoodChoice">
+    <p class="subtitle animate-fade-in-up">Akşama doğru...</p>
+    <h2 class="text-romantic animate-fade-in-up delay-2">Ne <em>yesek?</em> 🍽</h2>
+    <div class="food-pick-grid animate-fade-in-up delay-3">
+      <button type="button" class="food-pick" data-food="pizza" id="pickPizza">
+        <img src="assets/images/pizza.gif?v=2" alt="Pizza animasyonu" width="120" height="120" decoding="async" fetchpriority="low">
+        Pizza
+      </button>
+      <button type="button" class="food-pick" data-food="burger" id="pickBurger">
+        <img src="assets/images/burger.gif" alt="Burger animasyonu" width="120" height="120" decoding="async" fetchpriority="low">
+        Burger
+      </button>
+      <button type="button" class="food-pick" data-food="sushi" id="pickSushi">
+        <img src="assets/images/sushi.gif?v=5" alt="Sushi animasyonu" width="120" height="120" decoding="async" fetchpriority="low">
+        Sushi
+      </button>
+    </div>
+    <p class="food-confirm-note" id="foodConfirmNote"></p>
+  </section>
+
+  <!-- Ekran 5: Kanlıkavak yürüyüşü -->
+  <section class="screen bg-evening hidden" id="screenWalkChoice">
+    <p class="subtitle animate-fade-in-up">Yemekten sonra...</p>
+    <h2 class="text-romantic animate-fade-in-up delay-2">Kanlıkavak'ta biraz <em>yürür müyüz?</em> 🌳</h2>
+    <div class="walk-pick-grid animate-fade-in-up delay-3" id="walkPickGrid">
+      <button type="button" class="food-pick" id="btnWalkYes">
+        <img src="assets/images/walk.gif?v=6" alt="Yürüyüş animasyonu" width="120" height="120" decoding="async" fetchpriority="low">
+        Yürürüz
+      </button>
+      <button type="button" class="food-pick walk-lazy-pick" id="btnWalkLazy">
+        <img src="assets/images/lazy.gif?v=1" alt="Tembel animasyonu" width="120" height="120" decoding="async" fetchpriority="low">
+        Çok tembelim
+      </button>
+    </div>
+    <p class="walk-done-msg" id="walkConfirmNote"></p>
+  </section>
+
+  <!-- Ekran 6: Bira -->
+  <section class="screen bg-evening hidden" id="screenBeer">
+    <h2 class="text-romantic animate-fade-in-up delay-2">2 bira <em>içelim mi?</em> 🍺</h2>
+    <div class="glass activity-card animate-fade-in-scale delay-3">
+      <img class="activity-img" src="assets/images/alcohol.png?v=2" alt="Bira" width="120" height="120" decoding="async" fetchpriority="low">
+      <p class="text-handwriting" style="font-size: 1.75rem;">Fakülte Osmangazi'de</p>
+    </div>
+    <div class="beer-pick-grid animate-fade-in-up delay-4" id="beerChoices">
+      <button class="btn-romantic btn-yes" id="btnHarikaaa">Harikaaa 💕</button>
+      <button class="btn-romantic btn-no" id="btnTired">Yorgun olabilirim olmaz</button>
+    </div>
+    <div class="beer-confirm" id="beerConfirm">
+      <p class="beer-confirm-text" id="beerConfirmText"></p>
+      <button class="btn-romantic btn-yes" id="beerConfirmBtn"></button>
+    </div>
+  </section>
+
+  <!-- Ekran 7: Final -->
+  <section class="screen bg-romantic hidden" id="screenFinal">
+    <h2 class="text-romantic animate-fade-in-up">Planımız <em>harika oldu</em> 💕</h2>
+    <p class="text-handwriting animate-fade-in-up delay-2" style="font-size: clamp(1.5rem, 4vw, 2rem); color: var(--color-rose-deep);">Randevuya hazır mısın Eda?</p>
+    <p class="text-body animate-fade-in-up delay-3">Hazırsan hadi ara beni</p>
+  </section>
+
+  <div class="soft-rain" id="softRain"></div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script src="assets/js/firebase-config.js"></script>
+  <script src="assets/js/tracking.js"></script>
+  <script>
+    const PAD = 20;
+
+    function saveResponse(fields) {
+      if (window.LoveTrack) LoveTrack.track(fields);
+    }
+
+    function rectsOverlap(a, b) {
+      return !(a.right + PAD < b.left ||
+               a.left - PAD > b.right ||
+               a.bottom + PAD < b.top ||
+               a.top - PAD > b.bottom);
+    }
+
+
+    function initSlipperyNoButton(noBtn, yesBtn, fleeArea, toast, options = {}) {
+      const NO_LINES = options.noLines || [
+        'Biraz düşüneyim 🙈',
+        'Hmm, yok kaçtım',
+        'Yakalayamadın ki',
+        'O buton bozuk galiba',
+        'Evet daha mantıklı 💕',
+        'Vazgeçtim, kaçıyorum',
+        'Sadece Evet var sanırım 😌',
+      ];
+      const yesLabel = options.yesLabel || 'Evet';
+
+      function getNoButtonText(n) {
+        if (n <= NO_LINES.length) return NO_LINES[n - 1];
+        const extra = n - NO_LINES.length;
+        const s = 's'.repeat(4 + (extra % 4));
+        return `${yesLabel} butonuna bas${s}!`;
+      }
+      const TOASTS = options.toasts || [
+        'Sanırım cevabın belli...',
+        'Bu buton hiç çalışmıyor',
+        'Bir de Evet\'e bak 👀',
+        'Kaçış başarılı!',
+        'Pes et, Evet de 💗',
+      ];
+
+      let attempts = 0;
+      let lastDodge = 0;
+      let lastPlacedX = null;
+      let lastPlacedY = null;
+      const recentQuadrants = [];
+      const EDGE = 16;
+      const JUMP_FAR = 280;
+      const CORNER_ZONE = 90;
+      const OPPOSITE_Q = { 0: 3, 3: 0, 1: 2, 2: 1 };
+
+      function setNoButtonText(text) {
+        const label = noBtn.querySelector('.slippery-label');
+        if (label) label.textContent = text;
+        else noBtn.textContent = text;
+      }
+
+      function getQuadrant(px, py, w, h, areaW, areaH) {
+        const cx = px + w / 2;
+        const cy = py + h / 2;
+        return (cx < areaW / 2 ? 0 : 1) + (cy < areaH / 2 ? 0 : 2);
+      }
+
+      function placeButton(fromX, fromY, mobileTap) {
+        const areaRect = fleeArea.getBoundingClientRect();
+        const yesRect = yesBtn.getBoundingClientRect();
+        const w = noBtn.offsetWidth;
+        const h = noBtn.offsetHeight;
+        const maxX = fleeArea.clientWidth - w - EDGE;
+        const maxY = fleeArea.clientHeight - h - EDGE;
+        const areaW = fleeArea.clientWidth;
+        const areaH = fleeArea.clientHeight;
+
+        const curX = parseFloat(noBtn.style.left) || (areaW - w) / 2;
+        const curY = parseFloat(noBtn.style.top) || 12;
+        const mx = fromX != null ? fromX - areaRect.left : areaW / 2;
+        const my = fromY != null ? fromY - areaRect.top : areaH / 2;
+
+        const clamp = (x, y) => ({
+          x: Math.min(Math.max(EDGE, x), maxX),
+          y: Math.min(Math.max(EDGE, y), maxY),
+        });
+
+        const trySpot = (x, y) => {
+          const p = clamp(x, y);
+          const box = {
+            left: areaRect.left + p.x,
+            top: areaRect.top + p.y,
+            right: areaRect.left + p.x + w,
+            bottom: areaRect.top + p.y + h,
+          };
+          if (rectsOverlap(box, yesRect)) return null;
+          return p;
+        };
+
+        const scoreSpot = (p) => {
+          const cx = p.x + w / 2;
+          const cy = p.y + h / 2;
+          let s = Math.hypot(cx - mx, cy - my) * 1.4;
+          s += Math.hypot(cx - (curX + w / 2), cy - (curY + h / 2)) * 0.8;
+
+          const q = getQuadrant(p.x, p.y, w, h, areaW, areaH);
+          if (recentQuadrants.includes(q)) s -= 320;
+          const lastQ = recentQuadrants[recentQuadrants.length - 1];
+          if (lastQ != null && OPPOSITE_Q[lastQ] === q) s -= 240;
+
+          const midX = Math.abs(cx - areaW / 2) < areaW * 0.22;
+          const midY = Math.abs(cy - areaH / 2) < areaH * 0.22;
+          if (midX || midY) s += 60 + Math.random() * 40;
+
+          if (lastPlacedX != null && Math.hypot(p.x - lastPlacedX, p.y - lastPlacedY) < 60) s -= 180;
+          return s + Math.random() * 120;
+        };
+
+        const candidates = [];
+        const bcx = curX + w / 2;
+        const bcy = curY + h / 2;
+        const awayAngle = Math.atan2(bcy - my, bcx - mx);
+
+        if (mobileTap) {
+          const goRight = Math.random() > 0.5;
+          const hJump = JUMP_FAR * (0.65 + Math.random() * 0.4);
+          candidates.push(
+            { x: curX + (goRight ? hJump : -hJump), y: curY + (Math.random() - 0.5) * 100 },
+            { x: curX + (goRight ? -hJump * 0.85 : hJump * 0.85), y: curY + (Math.random() - 0.5) * 80 },
+          );
+        }
+
+        for (let i = 0; i < 14; i++) {
+          const angle = i < 3
+            ? awayAngle + (Math.random() - 0.5) * 1.8
+            : Math.random() * Math.PI * 2;
+          const dist = JUMP_FAR * (0.55 + Math.random() * 0.55);
+          candidates.push({
+            x: curX + Math.cos(angle) * dist,
+            y: curY + Math.sin(angle) * dist,
+          });
+        }
+
+        for (let i = 0; i < 20; i++) {
+          candidates.push({
+            x: EDGE + Math.random() * (maxX - EDGE),
+            y: EDGE + Math.random() * (maxY - EDGE),
+          });
+        }
+
+        const stuckInCorner =
+          curX < CORNER_ZONE || curX > maxX - CORNER_ZONE ||
+          curY < CORNER_ZONE || curY > maxY - CORNER_ZONE;
+
+        if (stuckInCorner) {
+          const safeQ = [0, 1, 2, 3].filter((q) => !recentQuadrants.includes(q));
+          const pickQ = safeQ.length ? safeQ[Math.floor(Math.random() * safeQ.length)] : Math.floor(Math.random() * 4);
+          const qx = pickQ % 2 === 0 ? 0.15 + Math.random() * 0.3 : 0.55 + Math.random() * 0.3;
+          const qy = pickQ < 2 ? 0.15 + Math.random() * 0.3 : 0.55 + Math.random() * 0.3;
+          candidates.unshift({
+            x: EDGE + qx * (maxX - EDGE),
+            y: EDGE + qy * (maxY - EDGE),
+          });
+        }
+
+        const ranked = [];
+
+        for (const c of candidates) {
+          const p = trySpot(c.x, c.y);
+          if (!p) continue;
+          ranked.push({ p, s: scoreSpot(p) });
+        }
+
+        ranked.sort((a, b) => b.s - a.s);
+
+        let best = null;
+        if (ranked.length) {
+          const pool = ranked.slice(0, Math.min(4, ranked.length));
+          best = pool[Math.floor(Math.random() * pool.length)].p;
+        }
+
+        if (!best) {
+          for (let i = 0; i < 40; i++) {
+            best = trySpot(
+              EDGE + Math.random() * (maxX - EDGE),
+              EDGE + Math.random() * (maxY - EDGE),
+            );
+            if (best) break;
+          }
+        }
+
+        if (best) {
+          noBtn.style.left = `${best.x}px`;
+          noBtn.style.top = `${best.y}px`;
+          noBtn.style.transform = 'none';
+          lastPlacedX = best.x;
+          lastPlacedY = best.y;
+          recentQuadrants.push(getQuadrant(best.x, best.y, w, h, areaW, areaH));
+          if (recentQuadrants.length > 4) recentQuadrants.shift();
+        }
+      }
+
+      function dodge(clientX, clientY, mobileTap) {
+        if (noBtn.style.pointerEvents === 'none') return;
+        const now = Date.now();
+        if (now - lastDodge < 100) return;
+        lastDodge = now;
+
+        attempts++;
+        if (options.onAttempt) options.onAttempt(attempts);
+        setNoButtonText(getNoButtonText(attempts));
+        placeButton(clientX, clientY, !!mobileTap);
+
+        if (toast && attempts % 2 === 0) {
+          toast.textContent = TOASTS[Math.floor(Math.random() * TOASTS.length)];
+          toast.classList.add('show');
+          setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+      }
+
+      function setInitialPosition() {
+        const areaRect = fleeArea.getBoundingClientRect();
+        const yesRect = yesBtn.getBoundingClientRect();
+        const w = noBtn.offsetWidth;
+        const h = noBtn.offsetHeight;
+        let x;
+        let y;
+        if (options.initialBeside) {
+          x = yesRect.right - areaRect.left + 16;
+          y = yesRect.top - areaRect.top + (yesRect.height - h) / 2;
+        } else {
+          x = yesRect.left - areaRect.left + (yesRect.width - w) / 2;
+          y = yesRect.bottom - areaRect.top + 14;
+        }
+        noBtn.style.left = `${x}px`;
+        noBtn.style.top = `${y}px`;
+        noBtn.style.transform = 'none';
+        lastPlacedX = x;
+        lastPlacedY = y;
+      }
+
+      const isCoarsePointer = window.matchMedia('(pointer: coarse)').matches;
+
+      noBtn.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dodge(e.clientX, e.clientY, e.pointerType === 'touch');
+      });
+
+      noBtn.addEventListener('mouseenter', (e) => {
+        if (isCoarsePointer) return;
+        dodge(e.clientX, e.clientY, false);
+      });
+
+      noBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (isCoarsePointer) dodge(e.clientX, e.clientY, true);
+      });
+
+      let tapStart = null;
+      noBtn.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 1) {
+          tapStart = { x: e.touches[0].clientX, y: e.touches[0].clientY, t: Date.now() };
+        }
+      }, { passive: true });
+
+      noBtn.addEventListener('touchend', (e) => {
+        if (!tapStart) return;
+        const t = e.changedTouches[0];
+        const moved = Math.hypot(t.clientX - tapStart.x, t.clientY - tapStart.y);
+        if (moved < 16 && Date.now() - tapStart.t < 500) {
+          e.preventDefault();
+          dodge(t.clientX, t.clientY, true);
+        }
+        tapStart = null;
+      }, { passive: false });
+
+      function placeInstantly() {
+        noBtn.classList.add('no-transition');
+        setInitialPosition();
+        noBtn.classList.add('is-placed');
+        requestAnimationFrame(() => noBtn.classList.remove('no-transition'));
+      }
+
+      requestAnimationFrame(placeInstantly);
+
+      // Fontlar geç yüklendiğinde metin ölçüleri değişip buton kayabiliyor;
+      // henüz kimse dokunmadıysa yeniden hizala.
+      function realignIfUntouched() {
+        if (attempts === 0) placeInstantly();
+      }
+
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(() => requestAnimationFrame(realignIfUntouched));
+      }
+      window.addEventListener('resize', realignIfUntouched);
+
+      return { reposition: setInitialPosition };
+    }
+
+    function initCuteClock() {
+      const clock = document.getElementById('cuteClock');
+      const hourHand = document.getElementById('hourHand');
+      const minuteHand = document.getElementById('minuteHand');
+      const readout = document.getElementById('clockReadout');
+      const ticksG = document.getElementById('clockTicks');
+      const numsG = document.getElementById('clockNumbers');
+      const CX = 100, CY = 100;
+      const MIN_TOTAL = 12 * 60;
+      const MAX_TOTAL = 15 * 60;
+
+      const arc = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      arc.setAttribute('class', 'clock-range-arc');
+      arc.setAttribute('d', describeArc(CX, CY, 72, -90, 0));
+      clock.querySelector('svg').insertBefore(arc, ticksG);
+
+      function describeArc(cx, cy, r, startDeg, endDeg) {
+        const rad = (d) => d * Math.PI / 180;
+        const x1 = cx + r * Math.cos(rad(startDeg));
+        const y1 = cy + r * Math.sin(rad(startDeg));
+        const x2 = cx + r * Math.cos(rad(endDeg));
+        const y2 = cy + r * Math.sin(rad(endDeg));
+        const large = endDeg - startDeg > 180 ? 1 : 0;
+        return `M ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2}`;
+      }
+
+      for (let i = 0; i < 12; i++) {
+        const a = (i * 30 - 90) * Math.PI / 180;
+        const x1 = CX + Math.cos(a) * 78;
+        const y1 = CY + Math.sin(a) * 78;
+        const x2 = CX + Math.cos(a) * 86;
+        const y2 = CY + Math.sin(a) * 86;
+        const tick = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        tick.setAttribute('class', 'clock-tick' + (i <= 3 ? '' : ' clock-tick-disabled'));
+        tick.setAttribute('x1', x1); tick.setAttribute('y1', y1);
+        tick.setAttribute('x2', x2); tick.setAttribute('y2', y2);
+        ticksG.appendChild(tick);
+
+        const nx = CX + Math.cos(a) * 66;
+        const ny = CY + Math.sin(a) * 66;
+        const num = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        num.setAttribute('class', 'clock-number' + (i <= 3 ? '' : ' clock-number-disabled'));
+        num.setAttribute('x', nx);
+        num.setAttribute('y', ny);
+        num.textContent = i === 0 ? 12 : i;
+        numsG.appendChild(num);
+      }
+
+      let hours = 12;
+      let minutes = 0;
+      let dragging = null;
+
+      function pad(n) { return String(n).padStart(2, '0'); }
+
+      function clampTime() {
+        let total = hours * 60 + minutes;
+        if (total < MIN_TOTAL) {
+          hours = 12;
+          minutes = 0;
+        } else if (total > MAX_TOTAL) {
+          hours = 15;
+          minutes = 0;
+        }
+      }
+
+      function updateHands() {
+        clampTime();
+        const minDeg = minutes * 6;
+        const hourDeg = (hours % 12) * 30 + minutes * 0.5;
+        minuteHand.setAttribute('transform', `rotate(${minDeg} 100 100)`);
+        hourHand.setAttribute('transform', `rotate(${hourDeg} 100 100)`);
+        readout.textContent = `${pad(hours)}:${pad(minutes)}`;
+      }
+
+      function setFromAngle(angleDeg, hand) {
+        const a = (angleDeg + 90 + 360) % 360;
+        if (hand === 'minute') {
+          minutes = Math.round(a / 6) % 60;
+          if (minutes === 60) minutes = 0;
+        } else {
+          let h12 = Math.round(a / 30) % 12;
+          if (h12 === 0) h12 = 12;
+          hours = h12 === 12 ? 12 : h12 + 12;
+        }
+        updateHands();
+      }
+
+      function clientToAngle(clientX, clientY) {
+        const rect = clock.getBoundingClientRect();
+        const scale = 200 / rect.width;
+        const x = (clientX - rect.left) * scale;
+        const y = (clientY - rect.top) * scale;
+        return Math.atan2(y - CY, x - CX) * 180 / Math.PI;
+      }
+
+      function pickHand(clientX, clientY) {
+        const rect = clock.getBoundingClientRect();
+        const scale = 200 / rect.width;
+        const x = (clientX - rect.left) * scale;
+        const y = (clientY - rect.top) * scale;
+        const dist = Math.hypot(x - CX, y - CY);
+        return dist < 55 ? 'hour' : 'minute';
+      }
+
+      function onPointerDown(e) {
+        e.preventDefault();
+        dragging = pickHand(e.clientX, e.clientY);
+        clock.setPointerCapture(e.pointerId);
+        setFromAngle(clientToAngle(e.clientX, e.clientY), dragging);
+      }
+
+      function onPointerMove(e) {
+        if (!dragging) return;
+        setFromAngle(clientToAngle(e.clientX, e.clientY), dragging);
+      }
+
+      function onPointerUp(e) {
+        dragging = null;
+        try { clock.releasePointerCapture(e.pointerId); } catch (_) {}
+      }
+
+      clock.addEventListener('pointerdown', onPointerDown);
+      clock.addEventListener('pointermove', onPointerMove);
+      clock.addEventListener('pointerup', onPointerUp);
+      clock.addEventListener('pointercancel', onPointerUp);
+
+      updateHands();
+      return () => `${pad(hours)}:${pad(minutes)}`;
+    }
+
+    let getSelectedTime = initCuteClock();
+
+    const HEART_EMOJI = ['💕', '💗', '💖', '🩷', '✨', '💕'];
+    const CONFETTI_COLORS = ['#e899a8', '#f5c6d0', '#fce4de', '#e8dff5', '#fad9c8'];
+
+    function burstHearts(count = 70) {
+      for (let i = 0; i < count; i++) {
+        const piece = document.createElement('div');
+        piece.className = 'confetti-piece';
+        const isHeart = Math.random() > 0.35;
+        if (isHeart) {
+          piece.textContent = HEART_EMOJI[Math.floor(Math.random() * HEART_EMOJI.length)];
+          piece.style.fontSize = `${1 + Math.random() * 1.2}rem`;
+          piece.style.background = 'transparent';
+          piece.style.width = 'auto';
+          piece.style.height = 'auto';
+        } else {
+          piece.style.background = CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)];
+          piece.style.width = `${6 + Math.random() * 8}px`;
+          piece.style.height = piece.style.width;
+          piece.style.borderRadius = '50%';
+        }
+        piece.style.left = `${20 + Math.random() * 60}vw`;
+        piece.style.animationDuration = `${2 + Math.random() * 2.5}s`;
+        piece.style.animationDelay = `${Math.random() * 0.3}s`;
+        document.body.appendChild(piece);
+        piece.addEventListener('animationend', () => piece.remove());
+      }
+    }
+
+    function startSoftRain(container, count = 10) {
+      const items = ['💕', '💗', '✨', '🩷'];
+      for (let i = 0; i < count; i++) {
+        const el = document.createElement('span');
+        el.className = 'rain-particle';
+        el.textContent = items[Math.floor(Math.random() * items.length)];
+        el.style.left = `${Math.random() * 100}%`;
+        el.style.animationDuration = `${8 + Math.random() * 6}s`;
+        el.style.animationDelay = `${Math.random() * 5}s`;
+        el.style.fontSize = `${0.8 + Math.random() * 0.7}rem`;
+        container.appendChild(el);
+      }
+    }
+
+    function playDateIntro() {
+      setTimeout(() => document.getElementById('dateLabel').classList.add('show'), 200);
+      setTimeout(() => document.getElementById('datePickGrid').classList.add('show'), 450);
+    }
+
+    function animateDateParts() {
+      const parts = ['d1', 's1', 'd2', 's2', 'd3'];
+      parts.forEach((id, i) => {
+        setTimeout(() => document.getElementById(id).classList.add('show'), 200 + i * 160);
+      });
+    }
+
+    let selectedDate = '';
+
+    function playDateReveal() {
+      playDateIntro();
+    }
+
+    function formatTimeTR(value) {
+      return value;
+    }
+
+    /* ── Başlat ── */
+    const btnNo = document.getElementById('btnNo');
+    const btnYes = document.getElementById('btnYes');
+    const screenQuestion = document.getElementById('screenQuestion');
+    const dodgeToast = document.getElementById('dodgeToast');
+    const screenSuccess = document.getElementById('screenSuccess');
+    const screenDayStart = document.getElementById('screenDayStart');
+    const screenFoodChoice = document.getElementById('screenFoodChoice');
+    const screenWalkChoice = document.getElementById('screenWalkChoice');
+    const screenBeer = document.getElementById('screenBeer');
+    const screenFinal = document.getElementById('screenFinal');
+    const btnWalkYes = document.getElementById('btnWalkYes');
+    const btnWalkLazy = document.getElementById('btnWalkLazy');
+    const btnHarikaaa = document.getElementById('btnHarikaaa');
+    const btnTired = document.getElementById('btnTired');
+    const beerChoices = document.getElementById('beerChoices');
+    const beerConfirm = document.getElementById('beerConfirm');
+    const beerConfirmText = document.getElementById('beerConfirmText');
+    const beerConfirmBtn = document.getElementById('beerConfirmBtn');
+    const walkConfirmNote = document.getElementById('walkConfirmNote');
+    const btnConfirmTime = document.getElementById('btnConfirmTime');
+    const btnDayContinue = document.getElementById('btnDayContinue');
+    const timeConfirmNote = document.getElementById('timeConfirmNote');
+    const dayStartMeta = document.getElementById('dayStartMeta');
+    const foodConfirmNote = document.getElementById('foodConfirmNote');
+    const foodPicks = document.querySelectorAll('.food-pick');
+    const datePicks = document.querySelectorAll('.date-pick');
+    const datePickGrid = document.getElementById('datePickGrid');
+    const dateDisplayWrap = document.getElementById('dateDisplayWrap');
+
+    function goToScreen(from, to) {
+      from.classList.add('hidden');
+      to.classList.remove('hidden');
+    }
+
+    document.body.classList.add('lock-scroll');
+    startSoftRain(document.getElementById('softRain'), 10);
+    initSlipperyNoButton(btnNo, btnYes, screenQuestion, dodgeToast, {
+      onAttempt(n) { saveResponse({ no_button_attempts: n }); },
+    });
+    if (window.LoveTrack) LoveTrack.init();
+
+    function revealPage() {
+      if (document.body.classList.contains('ready')) return;
+      document.body.classList.add('ready');
+    }
+
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => requestAnimationFrame(revealPage));
+      setTimeout(revealPage, 1200);
+    } else {
+      requestAnimationFrame(revealPage);
+    }
+
+    btnWalkLazy.addEventListener('click', () => {
+      btnWalkLazy.classList.add('is-hidden');
+      saveResponse({ walk_lazy_dismissed: true });
+    });
+
+    btnYes.addEventListener('click', () => {
+      btnYes.disabled = true;
+      btnNo.style.pointerEvents = 'none';
+      saveResponse({ said_yes: true });
+      burstHearts(80);
+
+      setTimeout(() => {
+        screenQuestion.classList.add('hidden');
+        screenSuccess.classList.remove('hidden');
+        document.body.classList.remove('lock-scroll');
+        burstHearts(40);
+        playDateReveal();
+      }, 1800);
+    });
+
+    btnConfirmTime.addEventListener('click', () => {
+      if (!selectedDate) return;
+      const time = getSelectedTime();
+      dayStartMeta.textContent = `${selectedDate} · ${time}`;
+      timeConfirmNote.textContent = `${time}'te görüşürüz — sabırsızlanıyorum! 💕`;
+      timeConfirmNote.classList.add('chosen');
+      burstHearts(30);
+      btnConfirmTime.disabled = true;
+      saveResponse({ picked_date: selectedDate, picked_time: time });
+
+      setTimeout(() => {
+        goToScreen(screenSuccess, screenDayStart);
+        burstHearts(25);
+      }, 1600);
+    });
+
+    datePicks.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        selectedDate = btn.dataset.date;
+        saveResponse({ picked_date: selectedDate });
+        const [d, m, y] = selectedDate.split('.');
+        document.getElementById('d1').textContent = d;
+        document.getElementById('d2').textContent = m;
+        document.getElementById('d3').textContent = y;
+        ['d1', 's1', 'd2', 's2', 'd3'].forEach((id) => document.getElementById(id).classList.remove('show'));
+
+        datePicks.forEach((b) => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        datePickGrid.style.display = 'none';
+        dateDisplayWrap.classList.add('show');
+        animateDateParts();
+
+        setTimeout(() => {
+          document.getElementById('timeSection').classList.add('show');
+          btnConfirmTime.disabled = false;
+        }, 1100);
+      });
+    });
+
+    btnDayContinue.addEventListener('click', () => {
+      btnDayContinue.disabled = true;
+      burstHearts(20);
+      setTimeout(() => {
+        goToScreen(screenDayStart, screenFoodChoice);
+      }, 600);
+    });
+
+    let foodChosen = false;
+
+    foodPicks.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        if (foodChosen) return;
+        foodChosen = true;
+        foodPicks.forEach((b) => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        const labels = { pizza: 'Pizza', burger: 'Burger', sushi: 'Sushi' };
+        const label = labels[btn.dataset.food] || btn.dataset.food;
+        foodConfirmNote.textContent = `${label} dedin — harika seçim! 💕`;
+        saveResponse({ food_choice: btn.dataset.food });
+        burstHearts(25);
+
+        setTimeout(() => {
+          goToScreen(screenFoodChoice, screenWalkChoice);
+          document.body.classList.add('lock-scroll');
+          burstHearts(20);
+        }, 1600);
+      });
+    });
+
+    btnWalkYes.addEventListener('click', () => {
+      btnWalkYes.disabled = true;
+      btnWalkLazy.classList.add('is-hidden');
+      walkConfirmNote.textContent = 'Harika ben de öyle düşünmüştüm 💕';
+      saveResponse({ walk_yes: true });
+      burstHearts(30);
+
+      setTimeout(() => {
+        goToScreen(screenWalkChoice, screenBeer);
+        burstHearts(25);
+      }, 1600);
+    });
+
+    function goToFinal(beerChoice) {
+      saveResponse({ beer_choice: beerChoice, completed: true });
+      burstHearts(40);
+      setTimeout(() => {
+        goToScreen(screenBeer, screenFinal);
+        burstHearts(50);
+      }, 600);
+    }
+
+    let beerConfirmStep = 0;
+
+    btnHarikaaa.addEventListener('click', () => {
+      btnHarikaaa.disabled = true;
+      btnTired.disabled = true;
+      goToFinal('harikaaa');
+    });
+
+    btnTired.addEventListener('click', () => {
+      btnTired.disabled = true;
+      btnHarikaaa.disabled = true;
+      saveResponse({ beer_choice: 'yorgun' });
+      beerChoices.style.display = 'none';
+      beerConfirm.classList.add('show');
+      beerConfirmText.textContent = 'Emin misin?';
+      beerConfirmBtn.textContent = 'Eminim';
+      beerConfirmStep = 1;
+    });
+
+    beerConfirmBtn.addEventListener('click', () => {
+      if (beerConfirmStep === 1) {
+        beerConfirmText.textContent = 'Son kararın mı?';
+        beerConfirmBtn.textContent = 'Eminim';
+        beerConfirmStep = 2;
+      } else if (beerConfirmStep === 2) {
+        beerConfirmText.textContent = '';
+        beerConfirmBtn.textContent = 'Peki peki ısrar yok';
+        beerConfirmBtn.classList.remove('btn-yes');
+        beerConfirmBtn.classList.add('btn-no');
+        beerConfirmStep = 3;
+      } else if (beerConfirmStep === 3) {
+        beerConfirmBtn.disabled = true;
+        goToFinal('peki_peki');
+      }
+    });
+  </script>
+</body>
+</html>
