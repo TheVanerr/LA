@@ -2,11 +2,18 @@ graphify-out/
 scripts/
 preview-assets.html
 .firebase/
-supabase/
+node_modules/
+*.png
+!V1/**/*.png
+_screen2-nocss.png
 
-# Sadece proje kökündeki ham dosyalar (assets/images dahil değil)
+# Sadece proje kökündeki ham dosyalar
 /cofffee.gif
 /walk.gif
 /lazy.gif
 /giphy*.gif
 /alcohol.png
+/eldorado.jfif
+/snob.webp
+/il forno.jpg
+/marco pizeria.JPG

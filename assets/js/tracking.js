@@ -1,5 +1,6 @@
 (function () {
-  const STORAGE_KEY = 'loveapp_session_id';
+  const STORAGE_KEY = 'loveapp_v2_session_id';
+  const COLLECTION = 'date2_responses';
   let db = null;
 
   function getConfig() {
@@ -35,16 +36,14 @@
       session_id: getSessionId(),
       updated_at: firebase.firestore.FieldValue.serverTimestamp(),
       user_agent: navigator.userAgent,
+      version: 2,
       ...fields,
     };
 
     try {
-      await firestore
-        .collection('date_responses')
-        .doc(getSessionId())
-        .set(payload, { merge: true });
+      await firestore.collection(COLLECTION).doc(getSessionId()).set(payload, { merge: true });
     } catch (err) {
-      console.warn('[LoveTrack]', err);
+      console.warn('[LoveTrack V2]', err);
     }
   }
 

@@ -1,0 +1,109 @@
+/* 💗 LoveApp — Sweet romantic animasyonlar */
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(var(--tilt, -4deg)); }
+  50% { transform: translateY(-14px) rotate(calc(var(--tilt, -4deg) + 3deg)); }
+}
+
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0) rotate(var(--tilt, 6deg)); }
+  50% { transform: translateY(-10px) rotate(calc(var(--tilt, 6deg) - 2deg)); }
+}
+
+@keyframes soft-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes heartbeat-soft {
+  0%, 100% { transform: scale(1); }
+  30% { transform: scale(1.08); }
+  60% { transform: scale(1); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 16px rgba(232, 153, 168, 0.3); }
+  50% { box-shadow: 0 0 32px rgba(212, 115, 138, 0.45); }
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in-scale {
+  from { opacity: 0; transform: scale(0.85); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes sticker-pop {
+  0% { opacity: 0; transform: scale(0.5) rotate(-12deg); }
+  70% { transform: scale(1.08) rotate(2deg); }
+  100% { opacity: 1; transform: scale(1) rotate(var(--tilt, -5deg)); }
+}
+
+@keyframes wiggle-soft {
+  0%, 100% { transform: rotate(var(--tilt, 0deg)); }
+  25% { transform: rotate(calc(var(--tilt, 0deg) - 4deg)); }
+  75% { transform: rotate(calc(var(--tilt, 0deg) + 4deg)); }
+}
+
+@keyframes drift-down {
+  0% { transform: translateY(-10vh) rotate(0deg); opacity: 0.65; }
+  100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes bounce-in {
+  0% { transform: scale(0); opacity: 0; }
+  60% { transform: scale(1.06); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.animate-float { animation: float 4s ease-in-out infinite; }
+.animate-float-slow { animation: float-slow 5.5s ease-in-out infinite; }
+.animate-soft-pulse { animation: soft-pulse 2.5s ease-in-out infinite; }
+.animate-heartbeat-soft { animation: heartbeat-soft 1.4s ease-in-out infinite; }
+.animate-pulse-glow { animation: pulse-glow 2.5s ease-in-out infinite; }
+.animate-fade-in-up { animation: fade-in-up 0.85s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.animate-fade-in-scale { animation: fade-in-scale 0.65s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.animate-sticker-pop { animation: sticker-pop 0.7s cubic-bezier(0.68, -0.55, 0.265, 1.55) both; }
+.animate-wiggle-soft { animation: wiggle-soft 1.2s ease-in-out infinite; }
+.animate-bounce-in { animation: bounce-in 0.65s cubic-bezier(0.68, -0.55, 0.265, 1.55) both; }
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient-shift 10s ease infinite;
+}
+
+.delay-1 { animation-delay: 0.15s; }
+.delay-2 { animation-delay: 0.35s; }
+.delay-3 { animation-delay: 0.55s; }
+.delay-4 { animation-delay: 0.75s; }
+.delay-5 { animation-delay: 1s; }
+
+.hidden-init { opacity: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-float,
+  .animate-float-slow,
+  .animate-soft-pulse,
+  .animate-heartbeat-soft,
+  .animate-pulse-glow,
+  .animate-wiggle-soft,
+  .animate-gradient {
+    animation: none;
+  }
+
+  .animate-fade-in-up,
+  .animate-fade-in-scale,
+  .animate-sticker-pop,
+  .animate-bounce-in {
+    animation-duration: 0.01ms;
+    animation-delay: 0ms;
+  }
+}

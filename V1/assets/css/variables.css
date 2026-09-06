@@ -1,0 +1,45 @@
+/* 💗 LoveApp — Sweet romantic palet */
+/* Fontlar index.html <head> içinde preconnect ile yükleniyor. */
+
+:root {
+  --color-rose: #e899a8;
+  --color-rose-light: #f5c6d0;
+  --color-rose-deep: #d4738a;
+  --color-blush: #fff0f3;
+  --color-cream: #fff8f5;
+  --color-warm: #fce4de;
+  --color-lavender: #e8dff5;
+  --color-peach: #fad9c8;
+
+  --color-text: #5c4a52;
+  --color-text-soft: #8a7580;
+  --color-text-romantic: #9e5068;
+
+  --gradient-romantic: linear-gradient(155deg, #fff8f5 0%, #fff0f3 35%, #f5c6d0 70%, #e8dff5 100%);
+  --gradient-date: linear-gradient(160deg, #fff0f3 0%, #fce4de 50%, #f5c6d0 100%);
+  --gradient-evening: linear-gradient(180deg, #fff8f5 0%, #f5c6d0 55%, #e8dff5 100%);
+  --gradient-btn: linear-gradient(135deg, #e899a8, #d4738a);
+
+  --font-romantic: 'Cormorant Garamond', serif;
+  --font-handwriting: 'Caveat', cursive;
+  --font-body: 'Quicksand', sans-serif;
+
+  --shadow-soft: 0 4px 18px rgba(212, 115, 138, 0.18);
+  --shadow-glow: 0 0 28px rgba(232, 153, 168, 0.35);
+  --shadow-card: 0 8px 30px rgba(92, 74, 82, 0.1);
+
+  --radius-sm: 10px;
+  --radius-md: 18px;
+  --radius-lg: 28px;
+  --radius-full: 9999px;
+
+  --transition-fast: 0.2s ease;
+  --transition-smooth: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-bounce: 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+  --z-background: 0;
+  --z-particles: 10;
+  --z-content: 20;
+  --z-overlay: 30;
+  --z-modal: 40;
+}

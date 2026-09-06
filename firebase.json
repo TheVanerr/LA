@@ -7,14 +7,9 @@
       "**/node_modules/**",
       "graphify-out/**",
       "scripts/**",
-      "supabase/**",
+      "V1/firebase.json",
       "agent-tools/**",
-      "preview-assets.html",
-      "/cofffee.gif",
-      "/walk.gif",
-      "/lazy.gif",
-      "/giphy*.gif",
-      "/alcohol.png"
+      "preview-assets.html"
     ],
     "headers": [
       {
