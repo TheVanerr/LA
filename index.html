@@ -1140,7 +1140,7 @@
 
   <!-- 4: Tarih & jackpot -->
   <section class="screen bg-evening hidden" id="screenPlan">
-    <h2 class="text-romantic">Date günümüz <em>belli</em> 📅</h2>
+    <h2 class="text-romantic">Date günümüz <em>belli</em> 🌸</h2>
     <div class="date-fixed"><span>12 Eylül</span> 12.09.2026</div>
     <p class="jackpot-label">Bu sefer nasıl bir gün?</p>
     <div class="jackpot-wrap glass">
@@ -1816,7 +1816,9 @@
       return new Promise((resolve) => {
         const { el, strip } = reel;
         const total = strip.children.length;
-        const targetY = -(total - 1) * REEL_HEIGHT;
+        // Use actual rendered cell height instead of hardcoded constant
+        const cellH = strip.children[0]?.offsetHeight || REEL_HEIGHT;
+        const targetY = -(total - 1) * cellH;
 
         el.classList.add('spinning');
         strip.style.transition = 'none';
