@@ -169,10 +169,44 @@
       color: var(--color-text-romantic);
     }
 
-    .date-fixed span {
+    .date-fixed .date-lbl {
       font-family: var(--font-handwriting);
       font-size: 1.1rem;
       color: var(--color-gold);
+    }
+
+    .mini-cal {
+      display: inline-flex;
+      flex-direction: column;
+      width: 1.6em;
+      border-radius: 7px;
+      overflow: hidden;
+      border: 1px solid var(--color-gold);
+      background: #fff;
+      line-height: 1;
+      box-shadow: 0 2px 6px rgba(92, 74, 82, 0.2);
+    }
+
+    .mini-cal b {
+      background: var(--color-rose-deep);
+      color: #fff;
+      font-family: var(--font-body);
+      font-size: 0.42em;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      text-align: center;
+      padding: 0.28em 0;
+    }
+
+    .mini-cal i {
+      font-family: var(--font-body);
+      font-style: normal;
+      font-weight: 700;
+      font-size: 0.75em;
+      color: var(--color-text-romantic);
+      text-align: center;
+      padding: 0.12em 0 0.2em;
     }
 
     .jackpot-wrap {
@@ -280,7 +314,7 @@
       50% { filter: blur(1px); }
     }
 
-    .jackpot-reel.spinning .jackpot-symbol {
+    .jackpot-reel.spinning .jackpot-strip {
       animation: reel-blur 0.15s linear infinite;
     }
 
@@ -1141,7 +1175,7 @@
   <!-- 4: Tarih & jackpot -->
   <section class="screen bg-evening hidden" id="screenPlan">
     <h2 class="text-romantic">Date günümüz <em>belli</em> 🌸</h2>
-    <div class="date-fixed"><span>12 Eylül</span> 12.09.2026</div>
+    <div class="date-fixed"><span class="mini-cal" aria-hidden="true"><b>Eyl</b><i>12</i></span> <span class="date-lbl">12 Eylül</span> 2026</div>
     <p class="jackpot-label">Bu sefer nasıl bir gün?</p>
     <div class="jackpot-wrap glass">
       <div class="jackpot-machine" id="jackpotMachine">
@@ -1680,8 +1714,12 @@
       if (to === screenPlanEvening) resetEveningScreen();
     }
 
+    const IS_TOUCH = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+
     function burstHearts(count = 40, sourceEl = null) {
       const items = ['💕', '💗', '✨', '❤️', '💛'];
+      // Fewer particles on phones to avoid jank
+      if (IS_TOUCH) count = Math.min(count, 22);
 
       if (sourceEl) {
         // Burst from the element's center in all directions
@@ -1795,19 +1833,26 @@
     let spinning = false;
 
     function buildJackpotStrips() {
-      reels.forEach(({ strip }) => {
+      reels.forEach((reel) => {
+        const { strip } = reel;
         strip.innerHTML = '';
         const sequence = [];
-        for (let i = 0; i < 48; i++) {
+        for (let i = 0; i < 44; i++) {
           sequence.push(JACKPOT_SYMBOLS[Math.floor(Math.random() * JACKPOT_SYMBOLS.length)]);
         }
+        // Winning symbol, then buffer symbols so an overshoot never reveals blank
+        const winIndex = sequence.length;
         sequence.push(JACKPOT_WIN);
+        for (let i = 0; i < 5; i++) {
+          sequence.push(JACKPOT_SYMBOLS[Math.floor(Math.random() * JACKPOT_SYMBOLS.length)]);
+        }
         sequence.forEach((sym) => {
           const cell = document.createElement('div');
           cell.className = 'jackpot-symbol';
           cell.textContent = sym;
           strip.appendChild(cell);
         });
+        reel.winIndex = winIndex;
         strip.style.transform = 'translateY(0)';
       });
     }
@@ -1815,10 +1860,9 @@
     function spinReel(reel, duration) {
       return new Promise((resolve) => {
         const { el, strip } = reel;
-        const total = strip.children.length;
-        // Use actual rendered cell height instead of hardcoded constant
-        const cellH = strip.children[0]?.offsetHeight || REEL_HEIGHT;
-        const targetY = -(total - 1) * cellH;
+        const winCell = strip.children[reel.winIndex];
+        // Use the winning cell's real rendered offset — immune to sub-pixel accumulation
+        const targetY = winCell ? -winCell.offsetTop : -(strip.children.length - 1) * REEL_HEIGHT;
 
         el.classList.add('spinning');
         strip.style.transition = 'none';
