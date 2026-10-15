@@ -5,6 +5,7 @@ preview-assets.html
 node_modules/
 *.png
 !V1/**/*.png
+!V2/**/*.png
 _screen2-nocss.png
 
 # Sadece proje kökündeki ham dosyalar

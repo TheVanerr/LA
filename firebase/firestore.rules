@@ -13,5 +13,11 @@ service cloud.firestore {
       allow create, update: if true;
       allow delete: if false;
     }
+
+    match /date3_responses/{sessionId} {
+      allow read: if false;
+      allow create, update: if true;
+      allow delete: if false;
+    }
   }
 }

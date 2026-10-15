@@ -1,0 +1,17 @@
+{
+  "name": "patili-rota",
+  "version": "3.0.0",
+  "private": true,
+  "description": "Patili Rota — Eda için pixel art roguelike date daveti (V3). Beraber mod sunucusu.",
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server/server.js",
+    "test": "node tests/core.test.js && node tests/online.test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}

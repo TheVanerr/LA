@@ -1,0 +1,2 @@
+Gizli odalara koyacağın fotoğrafları bu klasöre at,
+sonra assets/js/config.js içindeki memoryPhotos / funnyPhotos listelerine ekle.

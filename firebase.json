@@ -9,7 +9,11 @@
       "scripts/**",
       "V1/firebase.json",
       "agent-tools/**",
-      "preview-assets.html"
+      "preview-assets.html",
+      "server/**",
+      "tests/**",
+      "package.json",
+      "package-lock.json"
     ],
     "headers": [
       {
